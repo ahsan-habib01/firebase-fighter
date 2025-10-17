@@ -1,51 +1,70 @@
-import React, { useState } from "react";
-import { Link } from "react-router";
-import MyContainer from "../components/MyContainer";
-import { FaEye } from "react-icons/fa";
-import { IoEyeOff } from "react-icons/io5";
+import React, { useState } from 'react';
+import { Link } from 'react-router';
+import MyContainer from '../components/MyContainer';
+import { FaEye } from 'react-icons/fa';
+import { IoEyeOff } from 'react-icons/io5';
 import {
+  GithubAuthProvider,
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
-} from "firebase/auth";
-import { auth } from "../firebase/firebase.config";
-import { toast } from "react-toastify";
-
+} from 'firebase/auth';
+import { auth } from '../firebase/firebase.config';
+import { toast } from 'react-toastify';
 
 const googleProvider = new GoogleAuthProvider();
+const githubProvider = new GithubAuthProvider();
 
 const Signin = () => {
   const [user, setUser] = useState(null);
   const [show, setShow] = useState(false);
 
-  const handleSignin = (e) => {
+  const handleSignin = e => {
     e.preventDefault();
     const email = e.target.email?.value;
     const password = e.target.password?.value;
-    console.log({ email, password });
+    // console.log({ email, password });
     signInWithEmailAndPassword(auth, email, password)
-      .then((res) => {
-        console.log(res);
+      .then(res => {
+        console.log(res.user);
         setUser(res.user);
-        toast.success("Signin successful");
+        if (!res.user.emailVerified) {
+          toast.warning('Please verify your email address');
+          return;
+        }
+        setUser(res.user)
+        toast.success('Signin successful');
       })
-      .catch((e) => {
-        console.log(e);
+      .catch(e => {
+        // console.log(e);
         toast.error(e.message);
       });
   };
 
   const handleGoogleSignin = () => {
-    console.log("google signin");
+    console.log('google signin');
     signInWithPopup(auth, googleProvider)
-      .then((res) => {
-        console.log(res);
+      .then(res => {
+        // console.log(res);
         setUser(res.user);
-        toast.success("Signin successful");
+        toast.success('Signin successful');
       })
-      .catch((e) => {
-        console.log(e);
+      .catch(e => {
+        // console.log(e);
+        toast.error(e.message);
+      });
+  };
+
+  const handleGithubSignIn = () => {
+    signInWithPopup(auth, githubProvider)
+      .then(res => {
+        // console.log(res);
+        setUser(res.user);
+        toast.success('Signin successful');
+      })
+      .catch(e => {
+        // console.log(e);
         toast.error(e.message);
       });
   };
@@ -53,15 +72,15 @@ const Signin = () => {
   const handleSignout = () => {
     signOut(auth)
       .then(() => {
-        toast.success("Signout successful");
+        toast.success('Signout successful');
         setUser(null);
       })
-      .catch((e) => {
+      .catch(e => {
         toast.error(e.message);
       });
   };
 
-  console.log(user);
+  // console.log(user);
 
   return (
     <div className="min-h-[calc(100vh-20px)] flex items-center justify-center bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 relative overflow-hidden">
@@ -89,7 +108,7 @@ const Signin = () => {
             {user ? (
               <div className="text-center space-y-3">
                 <img
-                  src={user?.photoURL || "https://via.placeholder.com/88"}
+                  src={user?.photoURL || 'https://via.placeholder.com/88'}
                   className="h-20 w-20 rounded-full mx-auto"
                   alt=""
                 />
@@ -118,7 +137,7 @@ const Signin = () => {
                 <div className="relative">
                   <label className="block text-sm mb-1">Password</label>
                   <input
-                    type={show ? "text" : "password"}
+                    type={show ? 'text' : 'password'}
                     name="password"
                     placeholder="••••••••"
                     className="input input-bordered w-full bg-white/20 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -129,6 +148,9 @@ const Signin = () => {
                   >
                     {show ? <FaEye /> : <IoEyeOff />}
                   </span>
+                  <div>
+                    <a className="link link-hover text-sm">Forgot password?</a>
+                  </div>
                 </div>
 
                 <button type="submit" className="my-btn">
@@ -156,8 +178,28 @@ const Signin = () => {
                   Continue with Google
                 </button>
 
+                {/* GitHub */}
+                <button
+                  onClick={handleGithubSignIn}
+                  className="btn bg-black text-white border-black w-full"
+                >
+                  <svg
+                    aria-label="GitHub logo"
+                    width="16"
+                    height="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      fill="white"
+                      d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z"
+                    ></path>
+                  </svg>
+                  Login with GitHub
+                </button>
+
                 <p className="text-center text-sm text-white/80 mt-3">
-                  Don’t have an account?{" "}
+                  Don’t have an account?{' '}
                   <Link
                     to="/signup"
                     className="text-pink-300 hover:text-white underline"

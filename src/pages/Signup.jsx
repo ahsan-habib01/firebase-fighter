@@ -1,24 +1,24 @@
-import { Link } from "react-router";
-
-import { FaEye } from "react-icons/fa";
-
-import { IoEyeOff } from "react-icons/io5";
-
-import MyContainer from "../components/MyContainer";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase/firebase.config";
-import { toast } from "react-toastify";
-import { useState } from "react";
+import { Link } from 'react-router';
+import { FaEye } from 'react-icons/fa';
+import { IoEyeOff } from 'react-icons/io5';
+import MyContainer from '../components/MyContainer';
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from 'firebase/auth';
+import { auth } from '../firebase/firebase.config';
+import { toast } from 'react-toastify';
+import { useState } from 'react';
 
 const Signup = () => {
   const [show, setShow] = useState(false);
 
-  const handleSignup = (e) => {
+  const handleSignup = e => {
     e.preventDefault();
     const email = e.target.email?.value;
     const password = e.target.password?.value;
 
-    console.log("signup function entered", { email, password });
+    console.log('signup function entered', { email, password });
     // console.log(password.length);
     // if (password.length < 6) {
     //   toast.error("Password should be at least 6 digit");
@@ -32,41 +32,48 @@ const Signup = () => {
 
     if (!regExp.test(password)) {
       toast.error(
-        "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character"
+        'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character'
       );
       return;
     }
 
     createUserWithEmailAndPassword(auth, email, password)
-      .then((res) => {
-        console.log(res);
-        toast.success("Signup successful");
+      .then(res => {
+        console.log(res.user);
+        e.target.reset();
+        // toast.success('Signup successful');
+        // email verification
+        sendEmailVerification(res.user).then(() => {
+          toast.info(
+            'Verification email sent! Please check your inbox and verify your email address before logging in.'
+          );
+        });
       })
-      .catch((e) => {
+      .catch(e => {
         console.log(e);
         console.log(e.code);
-        if (e.code === "auth/email-already-in-use") {
+        if (e.code === 'auth/email-already-in-use') {
           toast.error(
-            "User already exists in the database. Etai bastob haahahahaha"
+            'User already exists in the database. Etai bastob haahahahaha'
           );
-        } else if (e.code === "auth/weak-password") {
-          toast.error("Bhai tomake at least 6 ta digit er pass dite hobe");
-        } else if (e.code === "auth/invalid-email") {
-          toast.error("Invalid email format. Please check your email.");
-        } else if (e.code === "auth/user-not-found") {
-          toast.error("User not found. Please sign up first.");
-        } else if (e.code === "auth/wrong-password") {
-          toast.error("Wrong password. Please try again.");
-        } else if (e.code === "auth/user-disabled") {
-          toast.error("This user account has been disabled.");
-        } else if (e.code === "auth/too-many-requests") {
-          toast.error("Too many attempts. Please try again later.");
-        } else if (e.code === "auth/operation-not-allowed") {
-          toast.error("Operation not allowed. Please contact support.");
-        } else if (e.code === "auth/network-request-failed") {
-          toast.error("Network error. Please check your connection.");
+        } else if (e.code === 'auth/weak-password') {
+          toast.error('Bhai tomake at least 6 ta digit er pass dite hobe');
+        } else if (e.code === 'auth/invalid-email') {
+          toast.error('Invalid email format. Please check your email.');
+        } else if (e.code === 'auth/user-not-found') {
+          toast.error('User not found. Please sign up first.');
+        } else if (e.code === 'auth/wrong-password') {
+          toast.error('Wrong password. Please try again.');
+        } else if (e.code === 'auth/user-disabled') {
+          toast.error('This user account has been disabled.');
+        } else if (e.code === 'auth/too-many-requests') {
+          toast.error('Too many attempts. Please try again later.');
+        } else if (e.code === 'auth/operation-not-allowed') {
+          toast.error('Operation not allowed. Please contact support.');
+        } else if (e.code === 'auth/network-request-failed') {
+          toast.error('Network error. Please check your connection.');
         } else {
-          toast.error(e.message || "An unexpected error occurred.");
+          toast.error(e.message || 'An unexpected error occurred.');
         }
       });
   };
@@ -112,7 +119,7 @@ const Signup = () => {
                   Password
                 </label>
                 <input
-                  type={show ? "text" : "password"}
+                  type={show ? 'text' : 'password'}
                   name="password"
                   placeholder="••••••••"
                   className="input input-bordered w-full bg-white/20 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-pink-400"
@@ -131,7 +138,7 @@ const Signup = () => {
 
               <div className="text-center mt-3">
                 <p className="text-sm text-white/80">
-                  Already have an account?{" "}
+                  Already have an account?{' '}
                   <Link
                     to="/signin"
                     className="text-pink-300 hover:text-white font-medium underline"
