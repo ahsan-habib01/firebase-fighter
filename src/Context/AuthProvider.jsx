@@ -4,10 +4,12 @@ import {
   createUserWithEmailAndPassword,
   GithubAuthProvider,
   GoogleAuthProvider,
+  sendEmailVerification,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  updateProfile,
 } from 'firebase/auth';
 import { auth } from '../firebase/firebase.config';
 
@@ -33,6 +35,17 @@ const AuthProvider = ({ children }) => {
     return signInWithPopup(auth, githubProvider);
   };
 
+  const profileUpdate = (displayName, photoURL) => {
+    return updateProfile(auth.currentUser, {
+      displayName,
+      photoURL,
+    });
+  }
+
+  const emailVerification = () => {
+    return sendEmailVerification(auth.currentUser)
+  }
+
   const forgetPassword = email => {
     return sendPasswordResetEmail(auth, email);
   };
@@ -48,6 +61,8 @@ const AuthProvider = ({ children }) => {
     signIn,
     googleSignIn,
     githubSignIn,
+    profileUpdate,
+    emailVerification,
     signOutUser,
     forgetPassword,
   };

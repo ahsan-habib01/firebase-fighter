@@ -2,7 +2,6 @@ import { Link } from 'react-router';
 import { FaEye } from 'react-icons/fa';
 import { IoEyeOff } from 'react-icons/io5';
 import MyContainer from '../components/MyContainer';
-import { sendEmailVerification, updateProfile } from 'firebase/auth';
 import { toast } from 'react-toastify';
 import { useContext, useState } from 'react';
 import { AuthContext } from '../Context/AuthContext';
@@ -10,16 +9,17 @@ import { AuthContext } from '../Context/AuthContext';
 const Signup = () => {
   const [show, setShow] = useState(false);
 
-  const { createUser } = useContext(AuthContext);
+  const { createUser, profileUpdate, emailVerification } =
+    useContext(AuthContext);
 
   const handleSignup = e => {
     e.preventDefault();
-    const name = e.target.name?.value;
-    const photo = e.target.photo?.value;
+    const displayName = e.target.name?.value;
+    const photoURL = e.target.photo?.value;
     const email = e.target.email?.value;
     const password = e.target.password?.value;
 
-    console.log('signup function entered', { name, photo, email, password });
+    // console.log('signup function entered', { name, photo, email, password });
     // console.log(password.length);
     // if (password.length < 6) {
     //   toast.error("Password should be at least 6 digit");
@@ -39,17 +39,14 @@ const Signup = () => {
     // 1st Step: Create User
     // createUserWithEmailAndPassword(auth, email, password)
     createUser(email, password)
-      .then(res => {
-        const user = res.user;
+      .then(() => {
+        // const user = res.user;
 
         // 2nd Step: Update Profile
-        updateProfile(user, {
-          displayName: name,
-          photoURL: photo,
-        })
+        profileUpdate(displayName, photoURL)
           .then(() => {
             // 3rd Step: Email Verification
-            sendEmailVerification(user).then(() => {
+            emailVerification().then(() => {
               toast.info(
                 'Verification email sent! Please check your inbox and verify your email address before logging in.'
               );
