@@ -27,13 +27,14 @@ const Signin = () => {
     // console.log({ email, password });
     signInWithEmailAndPassword(auth, email, password)
       .then(res => {
-        console.log(res.user);
-        setUser(res.user);
+        // console.log(res.user);
+        const user = res.user;
+
         if (!res.user.emailVerified) {
           toast.warning('Please verify your email address');
           return;
         }
-        setUser(res.user)
+        setUser(user);
         toast.success('Signin successful');
       })
       .catch(e => {

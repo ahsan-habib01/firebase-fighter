@@ -5,6 +5,7 @@ import MyContainer from '../components/MyContainer';
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
+  updateProfile,
 } from 'firebase/auth';
 import { auth } from '../firebase/firebase.config';
 import { toast } from 'react-toastify';
@@ -15,10 +16,12 @@ const Signup = () => {
 
   const handleSignup = e => {
     e.preventDefault();
+    const name = e.target.name?.value;
+    const photo = e.target.photo?.value;
     const email = e.target.email?.value;
     const password = e.target.password?.value;
 
-    console.log('signup function entered', { email, password });
+    console.log('signup function entered', { name, photo, email, password });
     // console.log(password.length);
     // if (password.length < 6) {
     //   toast.error("Password should be at least 6 digit");
@@ -27,8 +30,6 @@ const Signup = () => {
 
     const regExp =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()\-_=+])[A-Za-z\d@$!%*?&#^()\-_=+]{8,}$/;
-
-    console.log(regExp.test(password));
 
     if (!regExp.test(password)) {
       toast.error(
@@ -39,41 +40,34 @@ const Signup = () => {
 
     createUserWithEmailAndPassword(auth, email, password)
       .then(res => {
-        console.log(res.user);
-        e.target.reset();
-        // toast.success('Signup successful');
-        // email verification
-        sendEmailVerification(res.user).then(() => {
-          toast.info(
-            'Verification email sent! Please check your inbox and verify your email address before logging in.'
-          );
-        });
+        const user = res.user;
+
+        updateProfile(user, {
+          displayName: name,
+          photoURL: photo,
+        })
+          .then(() => {
+            sendEmailVerification(user).then(() => {
+              toast.info(
+                'Verification email sent! Please check your inbox and verify your email address before logging in.'
+              );
+            });
+            e.target.reset();
+          })
+          .catch(error => {
+            toast.error(error.message);
+          });
       })
       .catch(e => {
-        console.log(e);
-        console.log(e.code);
+        // console.log(e.code);
         if (e.code === 'auth/email-already-in-use') {
-          toast.error(
-            'User already exists in the database. Etai bastob haahahahaha'
-          );
+          toast.error('User already exists.');
         } else if (e.code === 'auth/weak-password') {
-          toast.error('Bhai tomake at least 6 ta digit er pass dite hobe');
+          toast.error('Password is too weak. Must be at least 8 characters.');
         } else if (e.code === 'auth/invalid-email') {
-          toast.error('Invalid email format. Please check your email.');
-        } else if (e.code === 'auth/user-not-found') {
-          toast.error('User not found. Please sign up first.');
-        } else if (e.code === 'auth/wrong-password') {
-          toast.error('Wrong password. Please try again.');
-        } else if (e.code === 'auth/user-disabled') {
-          toast.error('This user account has been disabled.');
-        } else if (e.code === 'auth/too-many-requests') {
-          toast.error('Too many attempts. Please try again later.');
-        } else if (e.code === 'auth/operation-not-allowed') {
-          toast.error('Operation not allowed. Please contact support.');
-        } else if (e.code === 'auth/network-request-failed') {
-          toast.error('Network error. Please check your connection.');
+          toast.error('Invalid email format.');
         } else {
-          toast.error(e.message || 'An unexpected error occurred.');
+          toast.error(e.message);
         }
       });
   };
@@ -105,6 +99,24 @@ const Signup = () => {
 
             <form onSubmit={handleSignup} className="space-y-4">
               <div>
+                <label className="block text-sm font-medium mb-1">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Ahsan Habib"
+                  className="input input-bordered w-full bg-white/20 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-pink-400"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Photo</label>
+                <input
+                  type="text"
+                  name="photo"
+                  placeholder="Your Photo URL"
+                  className="input input-bordered w-full bg-white/20 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-pink-400"
+                />
+              </div>
+              <div>
                 <label className="block text-sm font-medium mb-1">Email</label>
                 <input
                   type="email"
@@ -121,7 +133,7 @@ const Signup = () => {
                 <input
                   type={show ? 'text' : 'password'}
                   name="password"
-                  placeholder="••••••••"
+                  placeholder="Enter your password"
                   className="input input-bordered w-full bg-white/20 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-pink-400"
                 />
                 <span
