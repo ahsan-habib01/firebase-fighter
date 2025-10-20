@@ -2,17 +2,15 @@ import { Link } from 'react-router';
 import { FaEye } from 'react-icons/fa';
 import { IoEyeOff } from 'react-icons/io5';
 import MyContainer from '../components/MyContainer';
-import {
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-  updateProfile,
-} from 'firebase/auth';
-import { auth } from '../firebase/firebase.config';
+import { sendEmailVerification, updateProfile } from 'firebase/auth';
 import { toast } from 'react-toastify';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { AuthContext } from '../Context/AuthContext';
 
 const Signup = () => {
   const [show, setShow] = useState(false);
+
+  const { createUser } = useContext(AuthContext);
 
   const handleSignup = e => {
     e.preventDefault();
@@ -38,15 +36,19 @@ const Signup = () => {
       return;
     }
 
-    createUserWithEmailAndPassword(auth, email, password)
+    // 1st Step: Create User
+    // createUserWithEmailAndPassword(auth, email, password)
+    createUser(email, password)
       .then(res => {
         const user = res.user;
 
+        // 2nd Step: Update Profile
         updateProfile(user, {
           displayName: name,
           photoURL: photo,
         })
           .then(() => {
+            // 3rd Step: Email Verification
             sendEmailVerification(user).then(() => {
               toast.info(
                 'Verification email sent! Please check your inbox and verify your email address before logging in.'

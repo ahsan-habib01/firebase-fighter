@@ -1,36 +1,31 @@
-import React, { useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import MyContainer from '../components/MyContainer';
 import { FaEye } from 'react-icons/fa';
 import { IoEyeOff } from 'react-icons/io5';
-import {
-  GithubAuthProvider,
-  GoogleAuthProvider,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signOut,
-} from 'firebase/auth';
-import { auth } from '../firebase/firebase.config';
 import { toast } from 'react-toastify';
-
-const googleProvider = new GoogleAuthProvider();
-const githubProvider = new GithubAuthProvider();
+import { AuthContext } from '../Context/AuthContext';
 
 const Signin = () => {
-  const [user, setUser] = useState(null);
   const [show, setShow] = useState(false);
+
+  const emailRef = useRef();
+
+  const {user, setUser, signIn, googleSignIn, githubSignIn, forgetPassword, signOutUser } =
+    useContext(AuthContext);
 
   const handleSignin = e => {
     e.preventDefault();
     const email = e.target.email?.value;
     const password = e.target.password?.value;
     // console.log({ email, password });
-    signInWithEmailAndPassword(auth, email, password)
+    // signInWithEmailAndPassword(auth, email, password)
+    signIn(email, password)
       .then(res => {
         // console.log(res.user);
         const user = res.user;
 
-        if (!res.user.emailVerified) {
+        if (!user.emailVerified) {
           toast.warning('Please verify your email address');
           return;
         }
@@ -44,8 +39,7 @@ const Signin = () => {
   };
 
   const handleGoogleSignin = () => {
-    console.log('google signin');
-    signInWithPopup(auth, googleProvider)
+    googleSignIn
       .then(res => {
         // console.log(res);
         setUser(res.user);
@@ -58,20 +52,31 @@ const Signin = () => {
   };
 
   const handleGithubSignIn = () => {
-    signInWithPopup(auth, githubProvider)
+    githubSignIn
       .then(res => {
-        // console.log(res);
         setUser(res.user);
         toast.success('Signin successful');
       })
       .catch(e => {
-        // console.log(e);
+        toast.error(e.message);
+      });
+  };
+
+  const handleForgetPassword = () => {
+    // console.log(e.target.email);
+    // console.log(emailRef.current);
+    const email = emailRef.current.value;
+    forgetPassword(email)
+      .then(() => {
+        toast.success('Password reset email sent! Check your inbox.');
+      })
+      .catch(e => {
         toast.error(e.message);
       });
   };
 
   const handleSignout = () => {
-    signOut(auth)
+    signOutUser()
       .then(() => {
         toast.success('Signout successful');
         setUser(null);
@@ -130,6 +135,7 @@ const Signin = () => {
                   <input
                     type="email"
                     name="email"
+                    ref={emailRef}
                     placeholder="example@email.com"
                     className="input input-bordered w-full bg-white/20 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
@@ -149,9 +155,9 @@ const Signin = () => {
                   >
                     {show ? <FaEye /> : <IoEyeOff />}
                   </span>
-                  <div>
+                  <button type="button" onClick={handleForgetPassword}>
                     <a className="link link-hover text-sm">Forgot password?</a>
-                  </div>
+                  </button>
                 </div>
 
                 <button type="submit" className="my-btn">
