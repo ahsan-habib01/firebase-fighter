@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { FaEye } from 'react-icons/fa';
 import { IoEyeOff } from 'react-icons/io5';
 import MyContainer from '../components/MyContainer';
@@ -9,8 +9,15 @@ import { AuthContext } from '../Context/AuthContext';
 const Signup = () => {
   const [show, setShow] = useState(false);
 
-  const { createUser, profileUpdate, emailVerification } =
-    useContext(AuthContext);
+  const {
+    createUser,
+    profileUpdate,
+    emailVerification,
+    setLoading,
+    signOutUser,
+    setUser,
+  } = useContext(AuthContext);
+  const navigate = useNavigate()
 
   const handleSignup = e => {
     e.preventDefault();
@@ -47,11 +54,18 @@ const Signup = () => {
           .then(() => {
             // 3rd Step: Email Verification
             emailVerification().then(() => {
-              toast.info(
-                'Verification email sent! Please check your inbox and verify your email address before logging in.'
-              );
+              e.target.reset();
+              setLoading(false);
+
+              // sign out
+              signOutUser().then(() => {
+                toast.info(
+                  'Verification email sent! Please check your inbox and verify your email address before logging in.'
+                );
+                setUser(null);
+                navigate('/signin')
+              });
             });
-            e.target.reset();
           })
           .catch(error => {
             toast.error(error.message);

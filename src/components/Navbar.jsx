@@ -1,14 +1,14 @@
-import { Link, NavLink } from 'react-router';
+import { Link } from 'react-router';
 import logo from '../assets/img/firebase-logo.png';
 import MyContainer from './MyContainer';
 import MyLink from './MyLink';
 import { use } from 'react';
 import { AuthContext } from '../Context/AuthContext';
 import { toast } from 'react-toastify';
-// import MyLink from "./MyLink";
+import { HashLoader } from 'react-spinners';
 
 const Navbar = () => {
-  const { user, setUser, signOutUser } = use(AuthContext);
+  const { user, setUser, signOutUser, loading, } = use(AuthContext);
 
   const handleSignout = () => {
     signOutUser()
@@ -39,14 +39,14 @@ const Navbar = () => {
           </li>
         </ul>
 
-        {user ? (
+        {loading ? (
+          <HashLoader />
+        ) : user ? (
           <div className="text-center space-y-3">
-            {/* change popover-1 and --anchor-1 names. Use unique names for each dropdown */}
-            {/* For TSX uncomment the commented types below */}
             <button
               className=""
               popoverTarget="popover-1"
-              style={{ anchorName: '--anchor-1' } /* as React.CSSProperties */}
+              style={{ anchorName: '--anchor-1' }}
             >
               <img
                 src={user?.photoURL || 'https://via.placeholder.com/88'}
@@ -59,9 +59,7 @@ const Navbar = () => {
               className="dropdown dropdown-end menu w-52 rounded-box bg-base-100 shadow-sm space-y-2"
               popover="auto"
               id="popover-1"
-              style={
-                { positionAnchor: '--anchor-1' } /* as React.CSSProperties */
-              }
+              style={{ positionAnchor: '--anchor-1' }}
             >
               <h2 className="text-xl font-semibold">{user?.displayName}</h2>
               <p className="">{user?.email}</p>

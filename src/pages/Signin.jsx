@@ -1,5 +1,5 @@
 import { useContext, useRef, useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import MyContainer from '../components/MyContainer';
 import { FaEye } from 'react-icons/fa';
 import { IoEyeOff } from 'react-icons/io5';
@@ -17,7 +17,12 @@ const Signin = () => {
     googleSignIn,
     githubSignIn,
     forgetPassword,
+    setLoading,
   } = useContext(AuthContext);
+
+  const location = useLocation();
+  const from = location.state || '/';
+  const navigate = useNavigate();
 
   const handleSignin = e => {
     e.preventDefault();
@@ -29,6 +34,7 @@ const Signin = () => {
       .then(res => {
         // console.log(res.user);
         const user = res.user;
+        setLoading(false);
 
         if (!user.emailVerified) {
           toast.warning('Please verify your email address');
@@ -36,6 +42,7 @@ const Signin = () => {
         }
         setUser(user);
         toast.success('Signin successful');
+        navigate(from);
       })
       .catch(e => {
         // console.log(e);
@@ -47,7 +54,9 @@ const Signin = () => {
     googleSignIn
       .then(res => {
         // console.log(res);
+        setLoading(false);
         setUser(res.user);
+        navigate(from);
         toast.success('Signin successful');
       })
       .catch(e => {
@@ -59,7 +68,9 @@ const Signin = () => {
   const handleGithubSignIn = () => {
     githubSignIn
       .then(res => {
+        setLoading(false);
         setUser(res.user);
+        navigate(from);
         toast.success('Signin successful');
       })
       .catch(e => {
@@ -73,13 +84,13 @@ const Signin = () => {
     const email = emailRef.current.value;
     forgetPassword(email)
       .then(() => {
+        setLoading(false);
         toast.success('Password reset email sent! Check your inbox.');
       })
       .catch(e => {
         toast.error(e.message);
       });
   };
-
 
   // console.log(user);
 

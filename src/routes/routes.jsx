@@ -5,10 +5,11 @@ import AboutUs from "../pages/AboutUs";
 import Profile from "../pages/Profile";
 import Signup from "../pages/Signup";
 import Signin from "../pages/Signin";
+import PrivateRoutes from "./PrivateRoutes";
 
 export const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <MainLayout />,
     children: [
       {
@@ -16,19 +17,23 @@ export const router = createBrowserRouter([
         element: <Homepage />,
       },
       {
-        path: "/about-us",
+        path: '/about-us',
         element: <AboutUs />,
       },
       {
-        path: "/profile",
-        element: <Profile />,
+        path: '/profile',
+        element: (
+          <PrivateRoutes>
+            <Profile />
+          </PrivateRoutes>
+        ),
       },
       {
-        path: "/signup",
+        path: '/signup',
         element: <Signup />,
       },
       {
-        path: "/signin",
+        path: '/signin',
         element: <Signin />,
       },
     ],
